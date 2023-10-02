@@ -15,13 +15,11 @@ class EmailHandler:
 
     @staticmethod
     def has_contact_info(text):
-        # Паттерн для поиска номера телефона
-        phone_pattern = r'(?:\+7|8|9)\d{8,}'  # Паттерн для поиска номера телефона
 
-        # Паттерн для поиска email
-        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,10}\b'  # Паттерн для поиска email
+        phone_pattern = r'(?:\+7|8|9)\d{8,}'
 
-        # Поиск номера телефона и email в тексте
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,10}\b'
+
         phone_match = re.search(phone_pattern, text)
         email_match = re.search(email_pattern, text)
 
@@ -34,14 +32,13 @@ class EmailHandler:
         msg['To'] = to_email
         msg['Subject'] = subject
 
-        # Включите метаданные пользователя в текст письма
         message += f"\n\nUser Metadata:\n{user_metadata}"
 
         msg.attach(MIMEText(message, 'plain'))
 
         try:
-            context = ssl.create_default_context() # Создайте контекст SSL
-            server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context = context)  # Используйте SMTP_SSL
+            context = ssl.create_default_context()  # Создайте контекст SSL
+            server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context=context)  # Используйте SMTP_SSL
             server.login(self.smtp_username, self.smtp_password)
             server.sendmail(self.from_email, to_email, msg.as_string())
             server.quit()
