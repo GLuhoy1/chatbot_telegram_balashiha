@@ -2,6 +2,7 @@ from confidential import Confidential as Con_data
 from DialogTree import DialogTree
 from BaseFunc import BaseFunc
 from EmailHandler import EmailHandler
+import time
 
 # Определение константы для текста "В начало"
 START_TEXT = "В начало"
@@ -113,5 +114,12 @@ class BotLogic(BaseFunc):
 
 if __name__ == "__main__":
     token_value = Con_data.token_value
-    my_bot = BotLogic(token_value)
-    my_bot.run()
+
+    while True:
+        try:
+            my_bot = BotLogic(token_value)
+            my_bot.run()
+        except Exception as e:
+            print(f"Произошла ошибка: {str(e)}")
+            print("Перезапуск через 2 секунды...")
+            time.sleep(2)
