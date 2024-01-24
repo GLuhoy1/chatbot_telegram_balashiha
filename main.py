@@ -3,6 +3,7 @@ from DialogTree import DialogTree
 from BaseFunc import BaseFunc
 from EmailHandler import EmailHandler
 import time
+
 # from telegram import User
 
 # Определение константы для текста "В начало"
@@ -37,7 +38,6 @@ class BotLogic(BaseFunc):
         # Получаем данные о пользователе
         user = message.from_user
         user_info = f"Имя: {user.first_name}\nФамилия: {user.last_name}\nUsername: {user.username}\nChat ID: {chat_id}"
-
 
         if chat_id not in self.chat_states:
             self.send_start_message(chat_id)
@@ -82,8 +82,8 @@ class BotLogic(BaseFunc):
                     print(f"DEBUG: Ошибка при отправке письма - Chat ID: {chat_id}")  # Добавлено для отладки
                     self.send_message(chat_id, "Произошла ошибка при отправке вопроса. Попробуйте позже.")
             else:
-                self.send_message(chat_id, "Пожалуйста, укажите ваши контактные данные (номер телефона или email) "
-                                           "для отправки вашего вопроса.")
+                self.send_message(chat_id, "Пожалуйста, укажите ваш вопрос и контактные данные (номер телефона и email)"
+                                           "в одном сообщении для отправки вашего вопроса.")
 
     def handle_message(self, message):
         chat_id = message.chat.id
@@ -104,12 +104,12 @@ class BotLogic(BaseFunc):
             self.send_message(chat_id, "Выберите следующий шаг:",
                               reply_markup=self.create_keyboard(current_state + [START_TEXT]))
         elif text.startswith("Написать письмо в университет"):
-            to_email = Con_data.priemka_email
+            to_email = Con_data.vuz_mail
             self.handle_custom_message_email(message, to_email)
             self.chat_states[chat_id]['waiting_for_contact_info'] = False
         elif 'waiting_for_contact_info' in self.chat_states[chat_id]:
             # Обработка сообщения пользователя после запроса контактных данных
-            to_email = Con_data.priemka_email
+            to_email = Con_data.vuz_mail
             self.handle_custom_message_email(message, to_email)
         else:
             next_state = self.find_btn_text(DialogTree.telegram_bot_data, text)
