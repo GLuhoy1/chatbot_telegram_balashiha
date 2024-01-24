@@ -1,0 +1,9 @@
+class Confidential:
+    token_value = '******'
+    smtp_server = '*****'
+    smtp_port = ***  #порт для SSL (465)
+    smtp_username = '******'
+    smtp_password = '********'
+
+    priemka_email = "*******"
+    vuz_email = "********"
