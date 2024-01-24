@@ -21,8 +21,14 @@ class BotLogic(BaseFunc):
     def send_start_message(self, chat_id):
         self.chat_states[chat_id] = {'current_state': self.start_menu_btn(DialogTree.telegram_bot_data)}
         keyboard = self.create_keyboard(self.chat_states[chat_id]['current_state'])
-        self.send_message(chat_id, "Добро пожаловать в справочного телеграмм бота! "
-                                   "На данный момент он находится на этапе тестирования.", reply_markup=keyboard)
+        self.send_message(chat_id, "Добро пожаловать в автоматизированную справочную систему Университета "
+                                   "Вернадского! Вы можете найти в нашем боте основную информацию для "
+                                   "абитуриентов/студентов, ссылки на электронные ресурсы и ЭИОС, а также задать "
+                                   "любой интересующий Вас вопрос через систему обращений! Просто выбирайте нужный "
+                                   "пункт через кнопки в нижней части экрана! Если вдруг их не видно, пожалуйста, "
+                                   "наберите в текстовой строке «/start» (без кавычек!). Спасибо за Ваше участие в "
+                                   "жизни Университета! Мы продолжаем работу и совершенствуем нашего бота!",
+                          reply_markup=keyboard)
 
     def handle_custom_message_email(self, message, to_email):
         chat_id = message.chat.id
@@ -32,6 +38,7 @@ class BotLogic(BaseFunc):
         user = message.from_user
         user_info = f"Имя: {user.first_name}\nФамилия: {user.last_name}\nUsername: {user.username}\nChat ID: {chat_id}"
 
+
         if chat_id not in self.chat_states:
             self.send_start_message(chat_id)
             return
@@ -40,9 +47,17 @@ class BotLogic(BaseFunc):
             # Пользователь только что выбрал отправку письма, просим описать вопрос
             self.chat_states[chat_id]['waiting_for_contact_info'] = True
             self.chat_states[chat_id]['custom_message'] = text
-            self.send_message(chat_id, "Коротко опишите ваш вопрос и не забудьте оставить ваши контактные данные "
-                                       "(номер телефона в формате +79009009000 или email):")
+            keyboard = self.create_keyboard(
+                self.chat_states[chat_id]['current_state'] + [START_TEXT])  # Добавлено здесь
+            self.send_message(chat_id, "Пожалуйста, в ОДНОМ сообщении, оставьте свои контактные данные (почту в "
+                                       "формате xxxxxxx@xxxxxxx.xx, на неё Вам придёт ответ, и телефон в формате "
+                                       "+7XXXXXXXXXX, по нему мы постараемся с Вами связаться, если Вы ошибётесь в "
+                                       "почте) и кратко опишите интересующий Вас вопрос "
+                                       "ВАЖНО: В рамках данного запроса Вы соглашаетесь на предоставление службам "
+                                       "Университета своих  контактных данных, без передачи этой информации третьим "
+                                       "лицам!", reply_markup=keyboard)  # И здесь
         else:
+
             # Создаем экземпляр EmailHandler
             smtp_server = Con_data.smtp_server
             smtp_port = Con_data.smtp_port
@@ -57,12 +72,14 @@ class BotLogic(BaseFunc):
 
             if EmailHandler.has_contact_info(text):
                 if email_handler.send_email(to_email, "Вопрос от пользователя", custom_message, text):
-                    self.send_message(chat_id, "Ваш вопрос отправлен. Спасибо!")
+                    self.send_message(chat_id, "Спасибо за Ваше обращение и интерес к Университету! В ближайшее время "
+                                               "Вам придёт ответ на указанный адрес электронной почты!")
 
                     # Очищаем состояние чата
                     del self.chat_states[chat_id]['waiting_for_contact_info']
                     del self.chat_states[chat_id]['custom_message']
                 else:
+                    print(f"DEBUG: Ошибка при отправке письма - Chat ID: {chat_id}")  # Добавлено для отладки
                     self.send_message(chat_id, "Произошла ошибка при отправке вопроса. Попробуйте позже.")
             else:
                 self.send_message(chat_id, "Пожалуйста, укажите ваши контактные данные (номер телефона или email) "
@@ -84,11 +101,14 @@ class BotLogic(BaseFunc):
             if len(current_state) > 1:
                 current_state.pop()
             self.chat_states[chat_id]['current_state'] = current_state
-            self.send_message(chat_id, "Выберите следующий шаг:", reply_markup=self.create_keyboard(current_state))
-        elif current_state == ["Написать письмо в ВУЗ"]:
-            to_email = Con_data.vuz_email
+            self.send_message(chat_id, "Выберите следующий шаг:",
+                              reply_markup=self.create_keyboard(current_state + [START_TEXT]))
+        elif text.startswith("Написать письмо в университет"):
+            to_email = Con_data.priemka_email
             self.handle_custom_message_email(message, to_email)
-        elif "Написать вопрос в приёмную комиссию" in current_state:
+            self.chat_states[chat_id]['waiting_for_contact_info'] = False
+        elif 'waiting_for_contact_info' in self.chat_states[chat_id]:
+            # Обработка сообщения пользователя после запроса контактных данных
             to_email = Con_data.priemka_email
             self.handle_custom_message_email(message, to_email)
         else:
