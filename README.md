@@ -1,2 +1,2 @@
-# chatbot_telegram_balashiha
-Try to make chat-bot for Viktor
+# chatbot_telegram_balashiha(prototype)
+Try to make chat-bot for RGUHN
