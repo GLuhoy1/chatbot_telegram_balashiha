@@ -23,7 +23,7 @@ class EmailHandler:
         phone_match = re.search(phone_pattern, text)
         email_match = re.search(email_pattern, text)
 
-        result = phone_match is not None or email_match is not None
+        result = email_match is not None
         return result
 
     def send_email(self, to_email, subject, message, user_metadata):

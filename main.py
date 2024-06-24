@@ -81,8 +81,7 @@ class BotLogic(BaseFunc):
                     print(f"DEBUG: Ошибка при отправке письма - Chat ID: {chat_id}")  # Добавлено для отладки
                     self.send_message(chat_id, "Произошла ошибка при отправке вопроса. Попробуйте позже.")
             else:
-                self.send_message(chat_id, "Пожалуйста, укажите ваш вопрос и контактные данные (номер телефона и "
-                                           "email). "
+                self.send_message(chat_id, "Пожалуйста, укажите ваш вопрос и контактные данные (email)."
                                            "\n\nВАЖНО: вопрос и контактные данные должны быть в одном сообщении!")
 
     def handle_message(self, message):
